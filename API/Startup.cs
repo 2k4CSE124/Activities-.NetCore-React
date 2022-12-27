@@ -1,18 +1,11 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
+using Application.Activities;
+using Application.Core;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using Persistence;
+using AutoMapper;
+using API.Extensions;
 
 namespace API
 {
@@ -35,10 +28,29 @@ namespace API
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "API", Version = "v1" });
             });
 
-            services.AddDbContext<DataContext>(opt =>
-            {
-                opt.UseSqlite(Configuration.GetConnectionString("DefaultConnection"));
-            });
+
+            // Call setting method from Extensions/ApplicationServiceExtensions.cs
+            services.AddApplicationServices(Configuration);
+
+            // // Add Connection String for SQlite
+            // services.AddDbContext<DataContext>(opt =>
+            // {
+            //     opt.UseSqlite(Configuration.GetConnectionString("DefaultConnection"));
+            // });
+
+            // // Cross-origin resource sharing (CORS) is a standard mechanism that allows 
+            // // JavaScript XMLHttpRequest (XHR) calls executed in a web page to interact with 
+            // // resources from non-origin domains.
+            // services.AddCors(opt =>
+            // {
+            //     opt.AddPolicy("CorsPolicy", policy =>
+            //     {
+            //         policy.AllowAnyMethod().AllowAnyHeader().WithOrigins("http://localhost:3000");
+            //     });
+            // });
+
+            // services.AddMediatR(typeof(List.Handler));
+            // services.AddAutoMapper(typeof(MappingProfiles).Assembly);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -50,6 +62,8 @@ namespace API
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "API v1"));
             }
+
+            app.UseCors("CorsPolicy");
 
             app.UseHttpsRedirection();
 
